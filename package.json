@@ -2,7 +2,7 @@
   "name": "anagram-api",
   "scripts": {
     "api": "node api.js",
-    "tests": "ruby tests/anagram_test.rb"
+    "tests": "node api.js & ruby tests/anagram_test.rb & wait"
   },
   "dependencies": {
     "body-parser": "^1.17.1",
