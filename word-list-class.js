@@ -1,3 +1,5 @@
+'use strict';
+
 class WordList{
     constructor(words){
         this.words = words;
@@ -24,6 +26,6 @@ class WordList{
     get(){
         return this.words;
     }
-}
+};
 
 module.exports = WordList;

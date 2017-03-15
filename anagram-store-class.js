@@ -1,3 +1,5 @@
+'use strict';
+
 class AnagramStore{
     constructor(redisClient){
         this.redisClient = redisClient;
