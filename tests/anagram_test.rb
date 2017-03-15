@@ -13,7 +13,7 @@ class TestCases < Test::Unit::TestCase
     @client = AnagramClient.new(ARGV)
 
     # add words to the dictionary
-    @client.post('/words.json', nil, {"words" => ["read", "dear", "dare"] }) rescue nil
+    @client.post('/words.json', nil, {"words" => ["read", "dear", "dare", "DARE"] }) rescue nil
   end
 
   # runs after each test
@@ -23,7 +23,7 @@ class TestCases < Test::Unit::TestCase
   end
 
   def test_adding_words
-    res = @client.post('/words.json', nil, {"words" => ["read", "dear", "dare"] })
+    res = @client.post('/words.json', nil, {"words" => ["read", "dear", "dare", "DARE"] })
 
     assert_equal('201', res.code, "Unexpected response code")
   end
@@ -39,7 +39,7 @@ class TestCases < Test::Unit::TestCase
 
     assert_not_nil(body['anagrams'])
 
-    expected_anagrams = %w(dare dear)
+    expected_anagrams = %w(DARE dare dear)
     assert_equal(expected_anagrams, body['anagrams'].sort)
   end
 
@@ -110,16 +110,16 @@ class TestCases < Test::Unit::TestCase
 
     body = JSON.parse(res.body)
 
-    assert_equal(['dare'], body['anagrams'])
+    assert_equal(['DARE', 'dare'], body['anagrams'])
   end
 
   def test_deleting_single_word_and_anagrams
-    # delete the word
+    # delete the anagrams
     res = @client.delete('/anagrams/dear.json')
 
     assert_equal('200', res.code, "Unexpected response code")
 
-    # expect it not to show up in results
+    # expect them not to show up in results
     res = @client.get('/anagrams/read.json')
 
     assert_equal('200', res.code, "Unexpected response code")
@@ -127,5 +127,41 @@ class TestCases < Test::Unit::TestCase
     body = JSON.parse(res.body)
 
     assert_equal([], body['anagrams']) 
+  end
+
+  def test_proper_noun_exclusion
+    res = @client.get('/anagrams/read.json', 'exclude_proper_nouns=true')
+
+    assert_equal('200', res.code, "Unexpected response code")
+
+    body = JSON.parse(res.body)
+
+    assert_equal(2, body['anagrams'].size)
+  end
+
+  def test_proper_noun_inclusion
+    res = @client.get('/anagrams/read.json')
+
+    assert_equal('200', res.code, "Unexpected response code")
+
+    body = JSON.parse(res.body)
+
+    assert_equal(3, body['anagrams'].size)
+  end
+
+  def test_word_list_are_anagrams
+    res = @client.post('/word_list.json', nil, {"words" => ["read", "dear", "dare", "DARE"] })
+    
+    body = JSON.parse(res.body)
+
+    assert_equal(true, body['anagrams'])
+  end
+
+  def test_word_list_arent_anagrams
+    res = @client.post('/word_list.json', nil, {"words" => ["read", "dear", "dare", "DAREE"] })
+
+    body = JSON.parse(res.body)
+
+    assert_equal(false, body['anagrams'])
   end
 end
