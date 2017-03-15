@@ -15,7 +15,7 @@ const redisClient = redis.createClient();
 const anagramStore = new AnagramStore(redisClient);
 
 // express middleware for JSON parsing
-api.use(bodyParser.json());
+api.use(bodyParser.json({ limit: '50mb' }));
 
 // adds words to the store
 api.post('/words.json', (req, res) => {
